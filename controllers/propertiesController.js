@@ -5,32 +5,32 @@ const { statusCode } = require("./utils/statusCode");
 
 
 
-const searchListings = asyncWrapper(async (req, res, next) => {
+const searchProperties = asyncWrapper(async (req, res, next) => {
     console.log(req.body)
     const properties = await Property.find(req.body.query);
     return res.status(statusCode.OK).send({ message: "Success", response: properties })
 })
 
-const addNewListing = asyncWrapper(async (req, res, next) => {
-    const newListing = new Property(req.body.property)
-    await newListing.save()
-    return res.status(statusCode.OK).send({message: "Success", response: newListing})
+const addNewProperty = asyncWrapper(async (req, res, next) => {
+    const newProperty = new Property(req.body.property)
+    await newProperty.save()
+    return res.status(statusCode.OK).send({message: "Success", response: newProperty})
 })
 
-const removeListing = asyncWrapper(async (req, res, next) => {
+const removeProperty = asyncWrapper(async (req, res, next) => {
     const property = await Property.findByIdAndDelete(req.body._id);
     return res.status(statusCode.OK).send({ message: "Success", response: property })
 })
 
-const updateListing = asyncWrapper(async (req, res, next) => {
+const updateProperty = asyncWrapper(async (req, res, next) => {
     const property = await Property.findByIdAndUpdate(req.body._id, req.body.property, { new: true })
     return res.status(statusCode.OK).send({ message: "Success", response: property })
 })
 
 
 module.exports = {
-    searchListings,
-    addNewListing,
-    removeListing,
-    updateListing
+    searchProperties,
+    addNewProperty,
+    removeProperty,
+    updateProperty
 }
