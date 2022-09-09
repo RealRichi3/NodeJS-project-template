@@ -12,6 +12,10 @@ const config = process.env
 const options = {toObject: { virtuals: true } }
 
 const admin = new Schema({
+    user: {
+        type: Schema.Types.ObjectId,
+        refPath: 'role'
+    },
     firstname: { type: String, required: [true, "Firstname is required"] },
     lastname: { type: String, required: [true, "Lastname is required"] },
     email: { type: String, unique: true, required: [true, "email is required"] },
@@ -49,7 +53,7 @@ const endUser = new Schema({
 
 
 const Agent = mongoose.model('Agent', agent).
-    EndUser = Base.discriminator("EndUser", endUser),
+    EndUser = mongoose.model("EndUser", endUser),
     Admin = mongoose.model('Admin', admin)
 
 
