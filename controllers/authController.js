@@ -139,7 +139,7 @@ const passwordReset = asyncWrapper(async (req, res, next) => {
 
 
 const confirmResetAndChangePassword = asyncWrapper(async (req, res, next) => {
-    const { reset_token, password } = req.body
+    const { reset_token, password } = req.body 
     if (!reset_token || !password) { throw new BadRequestError("Missing required parameter: Validation failed") }
 
     const authHeader = req.headers.authorization
