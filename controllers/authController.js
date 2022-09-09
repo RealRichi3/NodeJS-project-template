@@ -8,7 +8,7 @@ const { Token } = require('../models/tokenModel'),
 const { EndUser, Admin, Agent, User } = require('../models/usersModel');
 
 // Middlewares
-const {asyncWrapper} = require('../middlewares/asyncWrapper'),
+const { asyncWrapper } = require('../middlewares/asyncWrapper'),
     { CustomAPIError, createCustomError, BadRequestError, UnauthorizedError } = require('../middlewares/customError');
 
 // Utilities
@@ -45,7 +45,6 @@ const validateEmail = (email) => {
 
 const signup = asyncWrapper(async (req, res, next) => {
     let jwt_token;
-    console.log(req.body)
     if (!req.body.role) { throw new BadRequestError("Missing required parameter: Validation failed") }
     const { firstname, lastname, email, role, password, phonenumber } = req.body;
 
@@ -54,12 +53,11 @@ const signup = asyncWrapper(async (req, res, next) => {
     const match = await User.findOne({ email })
     if (match) {
         currUser = await User.findOne({ email: email }).populate('status');
-        console.log(currUser)
         if (!currUser.status.isVerified) {
             jwt_token = currUser.createJWT()
 
             let new_token = Math.floor(100000 + Math.random() * 900000);
-                await Token.findOneAndUpdate({ user: currUser._id }, { verification: new_token }, { new: true });
+            await Token.findOneAndUpdate({ user: currUser._id }, { verification: new_token }, { new: true });
             await sendMail(new EmailMsg(email, firstname, new_token).userAccountVerification());
 
             return res.status(statusCode.BADREQUEST).send({ message: "User exists, please verify your account", token: jwt_token })
@@ -89,7 +87,6 @@ const verifyEmail = asyncWrapper(async (req, res, next) => {
     const payload = decodeJWT(jwtToken)
 
     const currUser = await User.findOne({ _id: payload._id }).populate('token status')
-    console.log(currUser)
     if (currUser.status.isVerified) { throw new BadRequestError('User Account already verified') }
     if (currUser.token.verification != verification_token) {
         throw new UnauthorizedError('Invalid verification code')
@@ -109,13 +106,12 @@ const login = asyncWrapper(async (req, res, next) => {
     if (!email || !password) { throw new BadRequestError("Missing required parameter: Validation failed") }
 
     const currUser = await User.findOne({ email }).populate('password status');
-
     if (!currUser) { throw new BadRequestError('Invalid login credentials') }
     if (!currUser.status.isVerified) {
         jwt_token = currUser.createJWT()
 
         const new_token = Math.floor(100000 + Math.random() * 900000);
-        await VerificationToken.findOneAndUpdate({ user: currUser._id }, { token: new_token }, { new: true });
+        await Token.findOneAndUpdate({ user: currUser._id }, { verification: new_token }, { new: true });
         await sendMail(new EmailMsg(email, currUser.firstname, new_token).userAccountVerification());
 
         return res.status(statusCode.BADREQUEST).send({ message: "Please verify your account", token: jwt_token })
@@ -134,7 +130,6 @@ const passwordReset = asyncWrapper(async (req, res, next) => {
         currUser = await User.findOne({ email })
     if (!currUser) { throw new BadRequestError('User does not exist') }
 
-     console.log(currUser)
     const reset_token = Math.floor(100000 + Math.random() * 900000).toString(),
         reset_access_token = await currUser.createResetToken(reset_token);
 
@@ -152,24 +147,16 @@ const confirmResetAndChangePassword = asyncWrapper(async (req, res, next) => {
 
     const jwtToken = authHeader.split(' ')[1]
     const payload = decodeJWT(jwtToken)
-    console.log(payload)
     const currUserReset = await Token.findOne({ user: payload._id })
-    console.log(currUserReset)
 
     if (!currUserReset) { throw BadRequestError(' Reset token is invalid') }
     if (reset_token != payload.reset_token) { throw new BadRequestError(' Reset token is invalid ') }
     if (reset_token != currUserReset.password_reset) { throw new BadRequestError(' Reset token is invalid ') }
 
-    console.log("updated")
-    const updated = await currUserReset.update({password_reset: null}, {new: true})
-    console.log(updated)
-    const new_update = await Token.findOne({user: payload._id})
-    console.log(new_update)
-    // Token.update({reset_token: null}, {new: true})
+    await currUserReset.update({ password_reset: null }, { new: true })
     const hash = await hashString(password)
-    
-    const password_ = await Password.findOneAndUpdate({ user: payload._id }, { password: hash }, { new: true }).populate('user')
-    console.log(password_)
+
+    await Password.findOneAndUpdate({ user: payload._id }, { password: hash }, { new: true }).populate('user')
     return res.status(statusCode.OK).send({ message: "Password Reset successful" })
 })
 
