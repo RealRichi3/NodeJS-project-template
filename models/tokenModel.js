@@ -10,7 +10,7 @@ const token = new Schema({
     role: {
         type: String,
         required: true,
-        enum: ["Founder", "SuperAdmin", "Staff", "Ticketer", "BoatOperator", "EndUser"]
+        enum: ["Admin", "Agent", "EndUser"]
     },
     password_reset: { type: String, default: randomToken(16) },
     verification: { type: String,  default: `${Math.floor(100000 + Math.random() * 900000)}`  },
