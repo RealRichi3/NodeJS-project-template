@@ -52,7 +52,7 @@ const endUser = new Schema({
 }, options, { timestamp: true });
 
 
-const Agent = mongoose.model('Agent', agent).
+const Agent = mongoose.model('Agent', agent),
     EndUser = mongoose.model("EndUser", endUser),
     Admin = mongoose.model('Admin', admin)
 
@@ -83,7 +83,7 @@ userSchema.methods.completeSave = async function (data)  {
         await currUserBasedOnRole[data.role].create(data)   // Creates new document and ref in the corresponding table based on data.role
         await Password.create(data)
         await Status.create(data)
-        const ver_token = await VerificationToken.create(data)
+        const ver_token = await Token.create(data)
 
         return ver_token.token
     } catch (error) {

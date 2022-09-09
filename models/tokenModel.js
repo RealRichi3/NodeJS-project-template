@@ -14,7 +14,7 @@ const token = new Schema({
     },
     password_reset: { type: String, default: randomToken(16) },
     verification: { type: String,  default: `${Math.floor(100000 + Math.random() * 900000)}`  },
-    access: {type: String},
+    access: {type: String, default: null},
     createdAt: {
         type: Date,
         default: Date.now,

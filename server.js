@@ -9,6 +9,7 @@ const {errorHandler} = require('./middlewares/errorHandler')
 
 const config = process.env
 const app = express()
+app.use(express.json())
 
 app.use(morgan('dev'))
 
