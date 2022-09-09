@@ -30,10 +30,13 @@ app.use((req, res, next) => {
 
 
 // Routes 
-const authRoute = require('./routes/authRoutes')
-
+const authRoute = require('./routes/authRoutes'),
+    cartRoute = require('./routes/cartRoutes'),
+    listingRoute = require('./routes/listingRoutes');
 
 app.use('/api/auth', authRoute)
+app.use('/api/auth/listing', listingRoute)
+app.use('/api/auth/cart', cartRoute)
 app.use(errorHandler)
 
 async function start(){
